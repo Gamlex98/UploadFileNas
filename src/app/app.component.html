@@ -1,0 +1,23 @@
+
+<h1>hola</h1>
+
+
+
+<div *ngIf="!authenticated">
+  <button type="button" (click)="authenticate()">Autenticar</button>
+</div>
+
+
+<div *ngIf="authenticated">
+  
+  <input type="file" (change)="onFileSelected($event)">
+  <button (click)="onUpload()">Upload</button>
+
+</div>
+
+
+
+
+
+
+

@@ -4,7 +4,7 @@ import { HttpClientModule } from '@angular/common/http';
 import {FormsModule , ReactiveFormsModule } from '@angular/forms'
 import { AuthenticationService } from './upload-service';
 import { AuthenticationComponent } from './app.component';
-
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @NgModule({
   declarations: [
@@ -14,7 +14,8 @@ import { AuthenticationComponent } from './app.component';
     BrowserModule,
     HttpClientModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatProgressBarModule,
   ],
   providers: [AuthenticationService],
   bootstrap: [AuthenticationComponent]

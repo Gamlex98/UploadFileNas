@@ -14,6 +14,9 @@ export class AuthenticationComponent {
   authenticated = false;
   sid = '';
 
+  porcentaje: number = 0;
+  enviando: boolean = false;
+
   constructor(private authService: AuthenticationService,private http: HttpClient) {}
 
   authenticate() {
@@ -50,6 +53,7 @@ export class AuthenticationComponent {
     headers.append('Content-Type', 'multipart/form-data');
     headers.append('Accept', 'application/json');
 
+    if(this.fileToUpload) {
     this.http.post(uploadUrl, formData, { headers }).subscribe(
       response => {
         console.log('Upload successful', response);
@@ -58,6 +62,23 @@ export class AuthenticationComponent {
         console.error('Upload failed', error);
       }
     );
+    this.progressBar();
+    }else {
+      alert("Debes seleccionar un archivo");
+    }
+  }
+
+  progressBar() {
+    this.enviando = true;
+    this.porcentaje = 0; // resetear el porcentaje
+    let intervalo = setInterval(() => {
+      if (this.porcentaje < 100) {
+        this.porcentaje += 10;
+      } else {
+        clearInterval(intervalo);
+        this.enviando = false;
+      }
+    }, 100);
   }
 
 }

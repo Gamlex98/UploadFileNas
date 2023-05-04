@@ -11,7 +11,16 @@
 <div *ngIf="authenticated">
   
   <input type="file" (change)="onFileSelected($event)">
-  <button (click)="onUpload()">Upload</button>
+  
+  <button type="submit" class="btn btn-primary" color="primary" [disabled]="enviando" (click)="onUpload()">
+    <span *ngIf="!enviando"> Enviar </span>
+    <span *ngIf="enviando"> Enviando... </span>
+  </button>
+  
+  <mat-progress-bar mode="determinate" [value]="porcentaje" style="margin-top: 20px;"></mat-progress-bar>
+  <div *ngIf="!enviando && porcentaje === 100" class="letraEnvio">
+    Envío Exitoso
+  </div>
 
 </div>
 

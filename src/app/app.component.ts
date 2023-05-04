@@ -10,10 +10,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 export class AuthenticationComponent {
 
   fileToUpload !: File ;
-
   authenticated = false;
   sid = '';
-
   porcentaje: number = 0;
   enviando: boolean = false;
 
@@ -44,6 +42,7 @@ export class AuthenticationComponent {
 
     const uploadUrl = `http://172.16.1.24:8095/cgi-bin/filemanager/utilRequest.cgi?func=upload&type=standard&sid=${this.sid}&dest_path=/Intranet&overwrite=1&progress=-Intranet`;
 
+    if(this.fileToUpload) {
     const formData = new FormData();
     formData.append('file', this.fileToUpload, this.fileToUpload.name);
     console.log("nombre archivo : " + this.fileToUpload.name);
@@ -53,7 +52,6 @@ export class AuthenticationComponent {
     headers.append('Content-Type', 'multipart/form-data');
     headers.append('Accept', 'application/json');
 
-    if(this.fileToUpload) {
     this.http.post(uploadUrl, formData, { headers }).subscribe(
       response => {
         console.log('Upload successful', response);
@@ -63,8 +61,9 @@ export class AuthenticationComponent {
       }
     );
     this.progressBar();
-    }else {
+    } else {
       alert("Debes seleccionar un archivo");
+      console.log("No selecciono archivo");
     }
   }
 
@@ -80,5 +79,4 @@ export class AuthenticationComponent {
       }
     }, 100);
   }
-
 }

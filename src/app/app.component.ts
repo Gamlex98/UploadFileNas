@@ -26,16 +26,16 @@ export class AuthenticationComponent {
     const usuario = 'Intranet';
     const pass = 'MW50cjQxMjMrLSo=';
 
-    this.authService.authenticate(usuario, pass).subscribe(
-      authSid => {
+    this.authService.authenticate(usuario, pass).subscribe({
+      next: (authSid) => {
         this.authenticated = true;
         this.sid = authSid;
-        console.log("SID generado: " + this.sid);
+        console.log(`SID generado: ${this.sid}`);
       },
-      error => {
-        console.error('Authentication failed', error);
+      error: (err) => {
+        console.error('Authentication failed', err);
       }
-    );
+    });
   }
 
   onFileSelected(event: any) {
@@ -51,43 +51,43 @@ export class AuthenticationComponent {
       return;
     }
       // Obtener la lista de archivos
-      this.authService.getList(this.sid).subscribe(
-        async (data) => {
-          console.log(data);  
-          const existingFile = data.find((file: { filename: string; }) => file.filename.toLowerCase() === this.fileToUpload.name.toLowerCase());
-          if (existingFile) {
-            const result = await Swal.fire({
-              title: 'El archivo ya existe. ¿Qué deseas hacer?',
-              icon: 'question',
-              showCancelButton: true,
-              confirmButtonText: 'Sobrescribir',
-              cancelButtonText: 'Cambiar nombre',
-            });
-          if (result.isConfirmed) {
-              this.uploadFile(uploadUrl);
-            } else if (result.dismiss == Swal.DismissReason.cancel) {
-              // Permitir al usuario cambiar el nombre del archivo
-              const newName = prompt("Por favor ingrese un nuevo nombre para el archivo:");
-              const extensionIndex = this.fileToUpload.name.lastIndexOf('.');
-              const extension = this.fileToUpload.name.substring(extensionIndex);
-              const newFilename = `${newName}${extension}`;
-              if (newFilename) {
-                const newFile =  new File([this.fileToUpload], newFilename, { type: this.fileToUpload.type });
-                this.fileToUpload = newFile;
-                this.onUpload();
-              } else {
-                alert("Debe ingresar un nombre válido para el archivo.");
-              }
-            }
-          } else {
-            this.uploadFile(uploadUrl);
-          }
-        },
-        (error) => {
-          console.error("Error al obtener la lista de archivos", error);
+    this.authService.getList(this.sid).subscribe({
+    next: async (data) => {
+    console.log(data);
+    const existingFile = data.find((file: { filename: string; }) => file.filename.toLowerCase() === this.fileToUpload.name.toLowerCase());
+    if (existingFile) {
+      const result = await Swal.fire({
+        title: 'El archivo ya existe. ¿Qué deseas hacer?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sobrescribir',
+        cancelButtonText: 'Cambiar nombre',
+      });
+      if (result.isConfirmed) {
+        this.uploadFile(uploadUrl);
+      } else if (result.dismiss == Swal.DismissReason.cancel) {
+        // Permitir al usuario cambiar el nombre del archivo
+        const newName = prompt("Por favor ingrese un nuevo nombre para el archivo:");
+        const extensionIndex = this.fileToUpload.name.lastIndexOf('.');
+        const extension = this.fileToUpload.name.substring(extensionIndex);
+        const newFilename = `${newName}${extension}`;
+        if (newFilename) {
+          const newFile =  new File([this.fileToUpload], newFilename, { type: this.fileToUpload.type });
+          this.fileToUpload = newFile;
+          this.onUpload();
+        } else {
+          alert("Debe ingresar un nombre válido para el archivo.");
         }
-      );
+      }
+    } else {
+      this.uploadFile(uploadUrl);
+    }
+  },
+  error: (error) => {
+    console.error("Error al obtener la lista de archivos", error);
   }
+  });
+}
 
   uploadFile(uploadUrl: string) {
     const formData = new FormData();

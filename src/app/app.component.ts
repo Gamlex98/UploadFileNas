@@ -16,6 +16,8 @@ export class AuthenticationComponent {
   porcentaje: number = 0;
   enviando: boolean = false;
   overwrite= false;
+  carpeta='';
+  botonEnviar= false;
   // listaArchivos: DocumentModel [] = [];
 
   constructor(private authService: AuthenticationService,private http: HttpClient) {}
@@ -46,6 +48,7 @@ export class AuthenticationComponent {
       return
     }
     const pruebaCarpeta = 'carpetaNoExistente11';
+    this.carpeta = pruebaCarpeta;
     const uploadUrl = `http://172.16.1.24:8095/cgi-bin/filemanager/utilRequest.cgi?func=upload&type=standard&sid=${this.sid}&dest_path=/Web/${pruebaCarpeta}&overwrite=1&progress=-Web`;
 
     const formData = new FormData();
@@ -95,6 +98,7 @@ export class AuthenticationComponent {
         });
         if (result.isConfirmed) {
           this.doUpload(uploadUrl,formData,headers);
+          this.botonEnviar=true;
           this.progressBar();
         } else if (result.dismiss == Swal.DismissReason.cancel) {
           // Permitir al usuario cambiar el nombre del archivo
@@ -119,6 +123,7 @@ export class AuthenticationComponent {
             const newFile =  new File([this.fileToUpload], newFilename, { type: this.fileToUpload.type });
             this.fileToUpload = newFile;
             this.onUpload();
+            this.botonEnviar=true;
           } 
         }
       } 
@@ -126,8 +131,41 @@ export class AuthenticationComponent {
     error: (error) => {
       console.error("Error al obtener la lista de archivos", error);
     }
-    });        
+    });
   }
+    // const downloadUrl = `http://172.16.1.24:8095/cgi-bin/filemanager/utilRequest.cgi?func=download&${this.sid}&isfolder=0&compress=0&source_path=/${carpeta}&source_file=${nombreA}&source_total=1`;
+  
+    downloadFile(): void {
+      // console.log('Sid: ' + this.sid);
+      // console.log('Carpeta :' + this.carpeta);
+      // console.log('Nombre : ' + this.fileToUpload.name);
+    
+      this.authService.download(this.sid, this.carpeta, this.fileToUpload.name).subscribe((archivo: Blob) => {
+        const nombreArchivo = this.fileToUpload.name;
+        const url = URL.createObjectURL(archivo);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = nombreArchivo;
+        link.click();
+      });
+      console.log("Descarga Exitosa !!");
+    };
+    
+  // deleteFile() {
+  //   const pruebaCarpeta = 'carpetaNoExistente11';
+  //   const deleteUrl = `http://172.16.1.24:8095/cgi-bin/filemanager/utilRequest.cgi?func=remove&sid=${this.sid}&file=/Web/${pruebaCarpeta}/${this.fileToUpload.name}`;
+  
+  //   this.http.delete(deleteUrl).subscribe({
+  //     next: () => {
+  //       console.log('Archivo eliminado exitosamente');
+  //       // Limpiar la variable fileToUpload
+  //       this.fileToUpload = undefined;
+  //     },
+  //     error: (err) => {
+  //       console.error('Error al eliminar el archivo', err);
+  //     }
+  //   });
+  // }
   
   doUpload(uploadUrl: string, formData: FormData, headers: HttpHeaders) {
     this.http.post(uploadUrl, formData, { headers }).subscribe({

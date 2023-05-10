@@ -38,5 +38,17 @@ export class AuthenticationService {
       })
     );
   }
+
+  download(sid: string, carpeta: string, nombre: string): Observable<any> {
+    const urlFile = `http://172.16.1.24:8095/cgi-bin/filemanager/utilRequest.cgi?func=download&sid=${sid}&isfolder=0&compress=0&source_path=/Web/${carpeta}&source_file=${nombre}&source_total=1`;
+  
+    return this.http.get(urlFile, { responseType: 'blob' }).pipe(
+      catchError(error => {
+        console.log('Error en descarga', error);
+        return throwError(error);
+      })
+    );
+  }
+  
 }
 

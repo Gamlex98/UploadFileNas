@@ -24,7 +24,10 @@
       <div *ngIf="!enviando && porcentaje === 100" class="letraEnvio">
         Envío Exitoso
       </div>
-  </div>
+
+      <button id="downloadBtn" class="btn btn-primary" color="primary" style="margin-top: 15px;" (click)="downloadFile()" [disabled]="!botonEnviar">Descargar</button>
+      <!-- <button id="deleteBtn" (click)="deleteFile()" [disabled]="!fileToUpload">Eliminar</button> -->
+    </div>
 </div>
 
 

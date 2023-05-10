@@ -2,3 +2,14 @@
 .letraEnvio {
     font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', Arial, Helvetica, sans-serif;
 }
+
+
+.container {
+    max-width: 800px; /* Ancho máximo del contenedor */
+    margin: 0 auto; /* Centrar horizontalmente */
+    padding: 20px; /* Margen interno */
+    border: 1px solid #ccc; /* Borde */
+    border-radius: 5px; /* Borde redondeado */
+    box-shadow: 0 0 5px #ccc; /* Sombra */
+  }
+  

@@ -26,8 +26,8 @@ export class AuthenticationService {
     );
   }
 
-  getList(sid : string): Observable<any> {
-    const url = `http://172.16.1.24:8095/cgi-bin/filemanager/utilRequest.cgi?func=get_list&sid=${sid}&is_iso=0&list_mode=all&path=/Intranet/prueba&dir=ASC&limit=1000&sort=filename&start=0`;
+  getList(sid : string, carpeta: string): Observable<any> {
+    const url = `http://172.16.1.24:8095/cgi-bin/filemanager/utilRequest.cgi?func=get_list&sid=${sid}&is_iso=0&list_mode=all&path=/Web/${carpeta}&dir=ASC&limit=1000&sort=filename&start=0`;
     return this.http.get(url).pipe(
       map((response: any) => {
         return response.datas;

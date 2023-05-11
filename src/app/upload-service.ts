@@ -40,9 +40,9 @@ export class AuthenticationService {
   }
 
   download(sid: string, carpeta: string, nombre: string): Observable<any> {
-    const urlFile = `http://172.16.1.24:8095/cgi-bin/filemanager/utilRequest.cgi?func=download&sid=${sid}&isfolder=0&compress=0&source_path=/Web/${carpeta}&source_file=${nombre}&source_total=1`;
+    const urDownload = `http://172.16.1.24:8095/cgi-bin/filemanager/utilRequest.cgi?func=download&sid=${sid}&isfolder=0&compress=0&source_path=/Web/${carpeta}&source_file=${nombre}&source_total=1`;
   
-    return this.http.get(urlFile, { responseType: 'blob' }).pipe(
+    return this.http.get(urDownload, { responseType: 'blob' }).pipe(
       catchError(error => {
         console.log('Error en descarga', error);
         return throwError(error);
@@ -50,5 +50,15 @@ export class AuthenticationService {
     );
   }
   
+  delete (sid: string , carpeta:string , nombre: string): Observable<any> {
+    const urlDelete = `http://172.16.1.24:8095/cgi-bin/filemanager/utilRequest.cgi?func=delete&sid=${sid}&path=/Web/${carpeta}&file_total=1&file_name=${nombre}`;
+
+    return this.http.delete(urlDelete).pipe(
+      catchError(error => {
+        console.log('Error en el DELETE : ', error);
+        return throwError(error);
+      })
+    );
+  }
 }
 

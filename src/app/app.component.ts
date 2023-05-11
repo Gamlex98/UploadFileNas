@@ -61,6 +61,7 @@ export class AuthenticationComponent {
 
     const checkDir = `http://172.16.1.24:8095/cgi-bin/filemanager/utilRequest.cgi?func=get_tree&sid=${this.sid}&is_iso=1&node=/Web`;
     
+    //Verificacion Carpeta Existente 
     this.http.get(checkDir).subscribe({
       next: (response) => {
         console.log(response);
@@ -83,6 +84,7 @@ export class AuthenticationComponent {
       }
     });
 
+    //Obtener archivos de la Nas y comparar nombre del archivo a subir
     this.authService.getList(this.sid , pruebaCarpeta).subscribe({
       next: async (data) => {
       console.log(data);
@@ -115,7 +117,7 @@ export class AuthenticationComponent {
               newName = null;
             }
           }
-
+          //Creacion archivo con el nuevo nombre
           const extensionIndex = this.fileToUpload.name.lastIndexOf('.');
           const extension = this.fileToUpload.name.substring(extensionIndex);
           const newFilename = `${newName}${extension}`;
@@ -126,20 +128,21 @@ export class AuthenticationComponent {
             this.botonEnviar=true;
           } 
         }
+      } else {
+        this.doUpload(uploadUrl, formData, headers);
+        this.botonEnviar= true;
+        this.progressBar();
       } 
     },
     error: (error) => {
       console.error("Error al obtener la lista de archivos", error);
     }
     });
-  }
-    // const downloadUrl = `http://172.16.1.24:8095/cgi-bin/filemanager/utilRequest.cgi?func=download&${this.sid}&isfolder=0&compress=0&source_path=/${carpeta}&source_file=${nombreA}&source_total=1`;
-  
+  }  
     downloadFile(): void {
       // console.log('Sid: ' + this.sid);
       // console.log('Carpeta :' + this.carpeta);
       // console.log('Nombre : ' + this.fileToUpload.name);
-    
       this.authService.download(this.sid, this.carpeta, this.fileToUpload.name).subscribe((archivo: Blob) => {
         const nombreArchivo = this.fileToUpload.name;
         const url = URL.createObjectURL(archivo);
@@ -148,24 +151,31 @@ export class AuthenticationComponent {
         link.download = nombreArchivo;
         link.click();
       });
+      Swal.fire(
+        'Archivo descargado Exitosamente !!',
+        'Tu archivo ha sido descargado.',
+        'success'
+      );
       console.log("Descarga Exitosa !!");
-    };
-    
-  // deleteFile() {
-  //   const pruebaCarpeta = 'carpetaNoExistente11';
-  //   const deleteUrl = `http://172.16.1.24:8095/cgi-bin/filemanager/utilRequest.cgi?func=remove&sid=${this.sid}&file=/Web/${pruebaCarpeta}/${this.fileToUpload.name}`;
-  
-  //   this.http.delete(deleteUrl).subscribe({
-  //     next: () => {
-  //       console.log('Archivo eliminado exitosamente');
-  //       // Limpiar la variable fileToUpload
-  //       this.fileToUpload = undefined;
-  //     },
-  //     error: (err) => {
-  //       console.error('Error al eliminar el archivo', err);
-  //     }
-  //   });
-  // }
+    }
+
+    deleteFile():void {
+      this.authService.delete(this.sid, this.carpeta,this.fileToUpload.name).subscribe({
+        next: () => {
+          console.log('Archivo eliminado exitosamente');
+          // Limpiar la variable fileToUpload
+          this.fileToUpload = new File([], '');
+          Swal.fire(
+            'Archivo Borrado Exitosamente !!',
+            'Tu archivo ha sido borrado.',
+            'success'
+          );
+        },
+        error: (err) => {
+          console.error('Error al eliminar el archivo', err);
+        }
+      });
+    }
   
   doUpload(uploadUrl: string, formData: FormData, headers: HttpHeaders) {
     this.http.post(uploadUrl, formData, { headers }).subscribe({

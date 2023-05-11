@@ -44,10 +44,10 @@ export class AuthenticationComponent {
 
   onUpload() {
     if (!this.fileToUpload){
-      alert("Debes seleccionar un archivo !!");
+      alert("DEBES SELECCIONAR UN ARCHIVO !!");
       return
     }
-    const pruebaCarpeta = 'carpetaNoExistente11';
+    const pruebaCarpeta = 'carpetaNoExistente12';
     this.carpeta = pruebaCarpeta;
     const uploadUrl = `http://172.16.1.24:8095/cgi-bin/filemanager/utilRequest.cgi?func=upload&type=standard&sid=${this.sid}&dest_path=/Web/${pruebaCarpeta}&overwrite=1&progress=-Web`;
 
@@ -66,7 +66,7 @@ export class AuthenticationComponent {
       next: (response) => {
         console.log(response);
         const existe = Object.values(response).filter((item: { name: string; type: string; }) => item.name === pruebaCarpeta && item.type === 'dir');
-        if (existe.length === 0) {
+        if (existe == null) {
           const createDir = `http://172.16.1.24:8095/cgi-bin/filemanager/utilRequest.cgi?func=createdir&type=standard&sid=${this.sid}&dest_folder=${pruebaCarpeta}&dest_path=/Web`;
           this.http.get(createDir).subscribe({
             next: (response) => {
@@ -77,7 +77,12 @@ export class AuthenticationComponent {
               console.error('Error al crear la carpeta de destino', err);
             }
           });
-        } 
+        } else {
+          this.doUpload(uploadUrl, formData, headers);
+          console.log("Carpeta ya existia , se subio el Archivo");
+          this.botonEnviar= true;
+          this.progressBar();
+        }  
       },
       error: (err) => {
         console.error('Error al verificar la carpeta de destino', err);
@@ -128,11 +133,7 @@ export class AuthenticationComponent {
             this.botonEnviar=true;
           } 
         }
-      } else {
-        this.doUpload(uploadUrl, formData, headers);
-        this.botonEnviar= true;
-        this.progressBar();
-      } 
+      }
     },
     error: (error) => {
       console.error("Error al obtener la lista de archivos", error);
@@ -140,41 +141,79 @@ export class AuthenticationComponent {
     });
   }  
     downloadFile(): void {
-      // console.log('Sid: ' + this.sid);
-      // console.log('Carpeta :' + this.carpeta);
-      // console.log('Nombre : ' + this.fileToUpload.name);
-      this.authService.download(this.sid, this.carpeta, this.fileToUpload.name).subscribe((archivo: Blob) => {
-        const nombreArchivo = this.fileToUpload.name;
-        const url = URL.createObjectURL(archivo);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = nombreArchivo;
-        link.click();
-      });
-      Swal.fire(
-        'Archivo descargado Exitosamente !!',
-        'Tu archivo ha sido descargado.',
-        'success'
-      );
-      console.log("Descarga Exitosa !!");
-    }
-
-    deleteFile():void {
-      this.authService.delete(this.sid, this.carpeta,this.fileToUpload.name).subscribe({
-        next: () => {
-          console.log('Archivo eliminado exitosamente');
-          // Limpiar la variable fileToUpload
-          this.fileToUpload = new File([], '');
-          Swal.fire(
-            'Archivo Borrado Exitosamente !!',
-            'Tu archivo ha sido borrado.',
-            'success'
-          );
+      this.authService.getList(this.sid , this.carpeta).subscribe({
+        next: (data) => {
+        console.log("Lista archivos :", data);
+        const archivo = data.find((file: { filename: string; }) => file.filename.toLowerCase() === this.fileToUpload.name.toLowerCase());
+        if (archivo == null) {
+          console.log("No hay archivo para descargar");
+          Swal.fire({
+            position: 'center',
+            icon: 'warning',
+            title: 'No hay archivo para DESCARGAR',
+            showConfirmButton: false,
+            timer: 1000
+          })
+        }else {
+          this.authService.download(this.sid, this.carpeta, this.fileToUpload.name).subscribe((archivo: Blob) => {
+            const nombreArchivo = this.fileToUpload.name;
+            const url = URL.createObjectURL(archivo);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = nombreArchivo;
+            link.click();
+  
+            Swal.fire(
+              'Archivo descargado Exitosamente !!',
+              'Tu archivo ha sido descargado.',
+              'success'
+            );
+            console.log("Descarga Exitosa !!");
+          }
+          )}
         },
-        error: (err) => {
-          console.error('Error al eliminar el archivo', err);
+        error: (error) => {
+          console.log("Error en la busqueda Archivos", error)
         }
-      });
+      })
+    }
+     
+    deleteFile():void {
+      this.authService.getList(this.sid , this.carpeta).subscribe({
+        next: (data) => {
+        console.log("Lista archivos :", data);
+        const archivo = data.find((file: { filename: string; }) => file.filename.toLowerCase() === this.fileToUpload.name.toLowerCase());
+        if (archivo == null) {
+          console.log("No hay archivo para eliminar");
+          Swal.fire({
+            position: 'center',
+            icon: 'warning',
+            title: 'No hay archivo para ELIMINAR',
+            showConfirmButton: false,
+            timer: 1000
+          })
+        }else {
+          this.authService.delete(this.sid, this.carpeta,this.fileToUpload.name).subscribe({
+            next: () => {
+              console.log('Archivo eliminado exitosamente');
+              // Limpiar la variable fileToUpload
+              Swal.fire(
+                'Archivo Borrado Exitosamente !!',
+                'Tu archivo ha sido borrado.',
+                'success'
+              );
+              return
+            },
+            error: (err) => {
+              console.error('Error al eliminar el archivo', err);
+            }
+          });
+        }
+        },
+        error: (error) => {
+          console.log("Error en la busqueda Archivos", error)
+        }
+      })
     }
   
   doUpload(uploadUrl: string, formData: FormData, headers: HttpHeaders) {
